@@ -1,13 +1,33 @@
 {
   "name": "markdown-preview-enhanced",
-  "main": "./lib/markdown-preview-enhanced",
-  "version": "0.8.6",
+  "main": "./out/src/extension",
+  "version": "0.15.8",
   "description": "One of the 'BEST' markdown preview extensions for Atom editor!",
   "repository": "https://github.com/shd101wyy/markdown-preview-enhanced",
-  "license": "University of Illinois/NCSA Open Source License",
+  "license": "NCSA",
   "engines": {
-    "atom": ">=0.174.0"
+    "atom": ">=1.16.0"
   },
+  "activationCommands": {
+    "atom-workspace": "markdown-preview-enhanced:toggle"
+  },
+  "activationHooks": [
+    "language-gfm:grammar-used",
+    "language-gfm-enhanced:grammar-used",
+    "language-markdown:grammar-used",
+    "language-pfm:grammar-used"
+  ],
+  "files": [
+    "assets",
+    "images",
+    "keymaps",
+    "menu",
+    "out",
+    "styles",
+    "LICENSE.md",
+    "README.md",
+    "markdown.png"
+  ],
   "keywords": [
     "markdown",
     "presentation",
@@ -32,231 +52,27 @@
     "latex"
   ],
   "scripts": {
-    "build": "nothing happened"
+    "build": "tsc --project .",
+    "build:watch": "tsc --project . --watch",
+    "lint": "tsc --project . --noEmit && tslint --project . && prettier-check --ignore-path .gitignore \"{.,src/**}/{*.{j,t}s,*.md,ts*.json}\"",
+    "lint-with-tests": "tsc --project . --noEmit && tslint --project . && prettier-check --ignore-path .gitignore \"{.,src/**,test/**}/{*.{j,t}s,*.md,ts*.json}\"",
+    "format": "prettier --write --ignore-path .gitignore \"{.,src/**}/{*.{j,t}s,*.md,ts*.json}\"",
+    "format-with-tests": "prettier --write --ignore-path .gitignore \"{.,src/**,test/**}/{*.{j,t}s,*.md,ts*.json}\""
   },
   "dependencies": {
-    "async": "^2.0.1",
-    "atom-space-pen-views": "^2.2.0",
-    "cheerio": "^0.15.0",
-    "gray-matter": "^2.0.2",
-    "html-pdf": "^2.1.0",
-    "imgur": "^0.1.7",
-    "katex": "^0.6.0",
-    "remarkable": "^1.6.2",
-    "request": "^2.73.0",
-    "temp": "^0.8.3",
-    "uslug": "^1.0.4"
+    "@shd101wyy/mume": "^0.3.6"
   },
-  "configSchema": {
-    "fileExtension": {
-      "type": "string",
-      "default": ".md, .mmark, .markdown",
-      "description": "You may need restart Atom after making changes here.",
-      "order": 0
-    },
-    "breakOnSingleNewline": {
-      "type": "boolean",
-      "default": true,
-      "description": "In Markdown, a single newline character doesn't cause a line break in the generated HTML. In GitHub Flavored Markdown, that is not true. Enable this config option to insert line breaks in rendered HTML for single newlines in Markdown source.",
-      "order": 10
-    },
-    "enableTypographer": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enable smartypants and other sweet transforms.",
-      "order": 11
-    },
-    "mathRenderingOption": {
-      "type": "string",
-      "default": "KaTeX",
-      "description": "Choose the Math expression rendering method here. You can also disable math rendering if you want by choosing 'None'.",
-      "enum": [
-        "KaTeX",
-        "MathJax",
-        "None"
-      ],
-      "order": 20
-    },
-    "indicatorForMathRenderingInline": {
-      "title": "Inline Indicator",
-      "type": "string",
-      "default": "[[\"$\", \"$\"]]",
-      "description": "Use customized Math expression inline indicator. By default it is '[[\"$\", \"$\"]]', which means content within '**$**' and '**$**' will be rendered in inline mode. You can also define multiple indicators separated by comma. For example, '[[\"$\", \"$\"], [\"\\\\\\\\(\", \"\\\\\\\\)\"]]' will render inline math expression within '**$**' and '**$**', '**\\\\(**' and '**\\\\)**'. **You may need to restart atom after making changes here**",
-      "order": 21
-    },
-    "indicatorForMathRenderingBlock": {
-      "title": "Block Indicator",
-      "type": "string",
-      "default": "[[\"$$\", \"$$\"]]",
-      "description": "Use customized Math expression block indicator. By default it is [[\"$$\", \"$$\"]]",
-      "order": 22
-    },
-    "enableWikiLinkSyntax": {
-      "title": "Enable Wiki Link syntax",
-      "type": "boolean",
-      "default": true,
-      "description": "Enable Wiki Link syntax support. More information can be found at https://help.github.com/articles/adding-links-to-wikis/",
-      "order": 30
-    },
-    "useGitHubStyle": {
-      "title": "Use GitHub.com style",
-      "type": "boolean",
-      "default": true,
-      "description": "Use the similar CSS styles for preview as the ones used on GitHub.com.",
-      "order": 40
-    },
-    "useGitHubSyntaxTheme": {
-      "title": "Use GitHub.com syntax theme",
-      "type": "boolean",
-      "default": true,
-      "description": "Use similar GitHub.com code block syntax theme.",
-      "order": 50
-    },
-    "liveUpdate": {
-      "type": "boolean",
-      "default": true,
-      "description": "Re-render the preview as the contents of the source changes, without requiring the source buffer to be saved. If disabled, the preview is re-rendered only when the buffer is saved to disk. Disable live update will also disable scroll sync.",
-      "order": 60
-    },
-    "frontMatterRenderingOption": {
-      "title": "Front Matter rendering option",
-      "type": "string",
-      "description": "You can choose how to render front matter here. 'none' option will hide front matter.",
-      "default": "table",
-      "enum": [
-        "table",
-        "code block",
-        "none"
-      ],
-      "order": 70
-    },
-    "scrollSync": {
-      "type": "boolean",
-      "default": true,
-      "description": "2 way scroll sync. Sync both markdown source and markdown preview when scrolling.",
-      "order": 75
-    },
-    "scrollDuration": {
-      "type": "string",
-      "default": "120",
-      "description": "Scroll duration is defined in milliseconds. Lower value indicates faster scrolling speed. Default is 120ms",
-      "order": 76
-    },
-    "documentExportPath": {
-      "title": "document export folder path",
-      "description": "When exporting document to disk, by default the document will be generated at the root path './'",
-      "type": "string",
-      "default": "./",
-      "order": 77
-    },
-    "exportPDFPageFormat": {
-      "title": "Pdf Page Format",
-      "type": "string",
-      "default": "Letter",
-      "enum": [
-        "A3",
-        "A4",
-        "A5",
-        "Legal",
-        "Letter",
-        "Tabloid"
-      ],
-      "order": 80
-    },
-    "orientation": {
-      "title": "Pdf Page Orientation",
-      "type": "string",
-      "default": "portrait",
-      "enum": [
-        "portrait",
-        "landscape"
-      ],
-      "order": 90
-    },
-    "marginsType": {
-      "title": "Pdf Margin type",
-      "type": "string",
-      "default": "default margin",
-      "enum": [
-        "default margin",
-        "no margin",
-        "minimum margin"
-      ],
-      "order": 100
-    },
-    "printBackground": {
-      "title": "Print Background when generating pdf",
-      "type": "boolean",
-      "default": true,
-      "description": "Include background color when generating pdf.",
-      "order": 110
-    },
-    "pdfUseGithub": {
-      "title": "Use Github style when generating pdf",
-      "type": "boolean",
-      "default": true,
-      "description": "If you enabled this option, then the pdf will be generated using Github Style. I add this option because if the markdown preview has black color background, then the generated pdf may also have black color background (if you enabled Print Background), which may affect the appearance of the generated pdf.",
-      "order": 120
-    },
-    "pdfOpenAutomatically": {
-      "title": "Open pdf file immediately after it is generated",
-      "type": "boolean",
-      "default": true,
-      "description": "If you enabled this option, then when pdf is generated, it will be opened by pdf viewer. For example, on Mac OS X, it will be opened by Preview.",
-      "order": 130
-    },
-    "phantomJSExportFileType": {
-      "title": "PhantomJS export file type",
-      "type": "string",
-      "default": "pdf",
-      "enum": [
-        "pdf",
-        "png",
-        "jpeg"
-      ],
-      "order": 131
-    },
-    "phantomJSMargin": {
-      "title": "PhantomJS margins",
-      "description": "Default is 0, units: mm, cm, in, px. You can also define 'top, right, bottom, left' margins in order like '1cm, 1cm, 1cm, 1cm' separated by comma ','.",
-      "type": "string",
-      "default": "1cm",
-      "order": 132
-    },
-    "openPreviewPaneAutomatically": {
-      "title": "Open preview pane automatically when opening a markdown file",
-      "type": "boolean",
-      "default": true,
-      "order": 140
-    },
-    "imageFolderPath": {
-      "title": "Image save folder path",
-      "description": "When using Image Helper to copy images, by default images will be copied to root image folder path '/assets'",
-      "type": "string",
-      "default": "/assets",
-      "order": 150
-    },
-    "imageUploader": {
-      "title": "Image Uploader",
-      "description": "you can choose different image uploader to upload image.",
-      "type": "string",
-      "default": "imgur",
-      "enum": [
-        "imgur",
-        "sm.ms"
-      ],
-      "order": 160
-    },
-    "mermaidTheme": {
-      "title": "Mermaid Theme",
-      "type": "string",
-      "default": "mermaid.css",
-      "enum": [
-        "mermaid.css",
-        "mermaid.dark.css",
-        "mermaid.forest.css"
-      ],
-      "order": 170
-    }
+  "devDependencies": {
+    "@types/atom": "^1.25.0",
+    "@types/jquery": "^3.3.0",
+    "@types/mocha": "^2.2.47",
+    "@types/node": "^9.4.0",
+    "@types/vfile": "^2.2.2",
+    "chinese-conv": "^1.0.1",
+    "prettier": "^1.11.1",
+    "prettier-check": "^2.0.0",
+    "tslint": "^5.9.1",
+    "tslint-config-prettier": "^1.10.0",
+    "typescript": "^2.7.2"
   }
 }

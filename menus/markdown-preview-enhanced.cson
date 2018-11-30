@@ -6,25 +6,16 @@
       'command': 'markdown-preview-enhanced:toggle'
     }
   ],
-  '.markdown-preview-enhanced': [
+  'atom-workspace atom-text-editor[data-grammar*="gfm"]': [
     {
-      'label': 'Open in Browser'
-      'command': 'markdown-preview-enhanced:open-in-browser'
-    }
-    {
-      'label': 'Export to Disk'
-      'command': 'markdown-preview-enhanced:export-to-disk'
-    }
-    {
-      'label': 'Pandoc'
-      'command': 'markdown-preview-enhanced:pandoc-document-export'
-    }
+      'label': 'Markdown Sync Preview',
+      'command': 'markdown-preview-enhanced:sync-preview'}
   ]
 'menu': [
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'markdown-preview-enhanced'
+      'label': 'Markdown Preview Enhanced'
       'submenu': [
         {
           'label': 'Toggle'
